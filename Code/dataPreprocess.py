@@ -76,7 +76,7 @@ def preprocessData():
     print(f"Rows after outlier removal: {len(completeRows)}")
 
     # Save readable cleaned file before one-hot encoding
-    readableCSVPath = os.path.join(script_dir, "..", "cleanedReadableDatasheet.csv")
+    readableCSVPath = os.path.join(script_dir, "..", "cleanedDatasheet.csv")
     completeRows.to_csv(readableCSVPath, index=False)
     print(f"Readable cleaned CSV saved to: {readableCSVPath}")
 
@@ -97,7 +97,7 @@ def preprocessData():
     machineLearningPath = os.path.join(script_dir, "..", "machineLearningDatasheet.csv")
     completeRows.to_csv(machineLearningPath, index=False)
 
-    print(f"Model-ready scaled CSV saved to: {machineLearningPath}")
+    print(f"Machine learning CSV saved to: {machineLearningPath}")
 
     return completeRows
 
