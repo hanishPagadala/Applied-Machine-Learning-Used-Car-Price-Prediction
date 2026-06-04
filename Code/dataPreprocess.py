@@ -24,6 +24,22 @@ def removeOutliers(df, columns, factor = 1.5):
         
     return cleanDF[~outlierMask].copy()
 
+def addFeatureEngineering(df):
+    engineeringDF = df.copy()
+
+    if "year" in engineeringDF.columns:
+        # calculate car age based on current year and year of manufacture
+        currentYear = 2026
+        engineeringDF["carAge"] = currentYear - engineeringDF["year"]
+
+        # clip lower bound to 0 to avoid negative ages
+        engineeringDF["carAge"] = engineeringDF["carAge"].clip(lower=0)
+
+        # remove year as it is now represented in carAge
+        engineeringDF.drop("year", axis=1, inplace=True)
+    
+    return engineeringDF
+
 def preprocessData():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(script_dir, ".." ,"datasheet.csv")
@@ -70,6 +86,10 @@ def preprocessData():
         completeRows = completeRows[completeRows["engine_size"] > 0]
 
     completeRows = completeRows.copy()
+    
+    # Add feature engineering
+    completeRows = addFeatureEngineering(completeRows)
+    print("Feature engineering added: carAge")
 
     # Apply standardization to the cleaned data
     completeRows = removeOutliers(completeRows, ["price"])
