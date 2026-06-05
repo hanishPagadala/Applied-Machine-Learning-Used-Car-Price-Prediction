@@ -2,6 +2,7 @@
 import pandas as pd
 import os
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 
 def removeOutliers(df, columns, factor = 1.5):
     cleanDF = df.copy()
@@ -91,7 +92,7 @@ def preprocessData():
     completeRows = addFeatureEngineering(completeRows)
     print("Feature engineering added: carAge")
 
-    # Apply standardization to the cleaned data
+    # Remove outliers
     completeRows = removeOutliers(completeRows, ["price"])
     print(f"Rows after outlier removal: {len(completeRows)}")
 
@@ -100,25 +101,61 @@ def preprocessData():
     completeRows.to_csv(readableCSVPath, index=False)
     print(f"Readable cleaned CSV saved to: {readableCSVPath}")
 
-    # One-hot encode categorical values for ML
-    completeRows = pd.get_dummies(completeRows, drop_first=True)
+    textColumns = completeRows.select_dtypes(include=["str"]).columns.tolist();
+    numericColumns = completeRows.select_dtypes(include=["number"]).columns.tolist()
 
-    # Select numeric columns after one-hot encoding
-    numericColumns = completeRows.select_dtypes(include=["number", "bool"]).columns.tolist()
+    # Convert to category to make train_test_split behave better
+    completeRows[textColumns] = completeRows[textColumns].astype('category') 
 
     # Do not scale price because it is the target value
     if "price" in numericColumns:
         numericColumns.remove("price")
 
+    # Splitting requires at least 3 makes of certain car (e.g. there's only 1 Oldsmobile)
+    make_counts = completeRows['make'].value_counts()
+    valid_makes = make_counts[make_counts >= 10].index
+    completeRows = completeRows[completeRows['make'].isin(valid_makes)]
+
+    train_df, temp_df = train_test_split(
+        completeRows,
+        test_size = 0.2, # Will split again into 10% for testing, 10% for validation
+        stratify=completeRows['make'] # Make sure manufacturers are distributed equally
+    )
+
+    validation_df, test_df = train_test_split(
+        temp_df,
+        test_size = 0.5,
+        stratify=temp_df['make'] # Make sure manufacturers are distributed equally
+    )
+
+    train_df = train_df.copy()
+    validation_df = validation_df.copy()
+    test_df = test_df.copy()
+
+    train_df = pd.get_dummies(train_df, drop_first=True, dtype=int)
+    validation_df = pd.get_dummies(validation_df, drop_first=True, dtype=int)
+    test_df = pd.get_dummies(test_df, drop_first=True, dtype=int)
+
     scaler = StandardScaler()
-    completeRows[numericColumns] = scaler.fit_transform(completeRows[numericColumns])
 
-    # Save final file
-    machineLearningPath = os.path.join(script_dir, "..", "machineLearningDatasheet.csv")
-    completeRows.to_csv(machineLearningPath, index=False)
+    # Prevent data leakage
+    train_df[numericColumns] = scaler.fit_transform(train_df[numericColumns])
+    validation_df[numericColumns] = scaler.transform(validation_df[numericColumns])
+    test_df[numericColumns] = scaler.transform(test_df[numericColumns])
 
-    print(f"Machine learning CSV saved to: {machineLearningPath}")
+    train_path = os.path.join(script_dir, "..", "train_data.csv")
+    validation_path = os.path.join(script_dir, "..", "validation_data.csv")
+    test_path = os.path.join(script_dir, "..", "test_data.csv")
 
-    return completeRows
+    train_df.to_csv(train_path, index=False)
+    validation_df.to_csv(validation_path, index=False)
+    test_df.to_csv(test_path, index=False)
 
-preprocessData()
+    print(f"Saved learning CSV to: {train_path}")
+    print(f"Saved validation CSV to: {validation_path}")
+    print(f"Saved test CSV to: {test_path}")
+
+    return train_df, validation_df, test_df
+
+if __name__ == "__main__":
+    preprocessData()

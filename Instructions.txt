@@ -2,4 +2,4 @@
 2. Open the terminal and run: python -m venv .venv
 3. In the same terminal run the environment: .venv\Scripts\activate or source .venv/bin/activate (MAC/LINUX)
 4. Upgrade python version: python -m pip install --upgrade pip
-5. Install requireents for the project: pip install -r requirments.txt
+5. Install requireents for the project: pip install -r requirements.txt
