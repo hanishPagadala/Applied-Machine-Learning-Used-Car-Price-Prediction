@@ -77,8 +77,8 @@ def preprocessData():
     if "price" in completeRows.columns:
         completeRows = completeRows[completeRows["price"] > 0]
 
-    if "miles" in completeRows.columns:
-        completeRows = completeRows[completeRows["miles"] >= 0]
+    if "miles" in completeRows.columns: # Some vehicle had a enormous number of miles and messed up the linear regression
+        completeRows = completeRows[completeRows["miles"] >= 0 & (completeRows["miles"] <= 1_000_000)]
 
     if "year" in completeRows.columns:
         completeRows = completeRows[(completeRows["year"] >= 1980) & (completeRows["year"] <= 2026)]
