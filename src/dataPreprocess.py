@@ -43,7 +43,7 @@ def addFeatureEngineering(df):
 
 def preprocessData():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(script_dir, ".." ,"datasheet.csv")
+    file_path = os.path.join(script_dir, "../data/raw/" ,"dataset.csv")
     df = pd.read_csv(file_path, encoding='cp1252')
 
     if "id" in df.columns:
