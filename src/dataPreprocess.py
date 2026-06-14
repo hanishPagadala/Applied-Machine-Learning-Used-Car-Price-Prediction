@@ -116,46 +116,34 @@ def preprocessData():
     valid_makes = make_counts[make_counts >= 10].index
     completeRows = completeRows[completeRows['make'].isin(valid_makes)]
 
-    train_df, temp_df = train_test_split(
+    train_df, test_df = train_test_split(
         completeRows,
-        test_size = 0.2, # Will split again into 10% for testing, 10% for validation
+        test_size = 0.2, # Training 80%, Testing 20%
         stratify=completeRows['make'] # Make sure manufacturers are distributed equally
     )
 
-    validation_df, test_df = train_test_split(
-        temp_df,
-        test_size = 0.5,
-        stratify=temp_df['make'] # Make sure manufacturers are distributed equally
-    )
-
     train_df = train_df.copy()
-    validation_df = validation_df.copy()
     test_df = test_df.copy()
 
     train_df = pd.get_dummies(train_df, drop_first=True, dtype=int)
-    validation_df = pd.get_dummies(validation_df, drop_first=True, dtype=int)
     test_df = pd.get_dummies(test_df, drop_first=True, dtype=int)
 
     scaler = StandardScaler()
 
     # Prevent data leakage
     train_df[numericColumns] = scaler.fit_transform(train_df[numericColumns])
-    validation_df[numericColumns] = scaler.transform(validation_df[numericColumns])
     test_df[numericColumns] = scaler.transform(test_df[numericColumns])
 
     train_path = os.path.join(script_dir, "..", "train_data.csv")
-    validation_path = os.path.join(script_dir, "..", "validation_data.csv")
     test_path = os.path.join(script_dir, "..", "test_data.csv")
 
     train_df.to_csv(train_path, index=False)
-    validation_df.to_csv(validation_path, index=False)
     test_df.to_csv(test_path, index=False)
 
     print(f"Saved learning CSV to: {train_path}")
-    print(f"Saved validation CSV to: {validation_path}")
     print(f"Saved test CSV to: {test_path}")
 
-    return train_df, validation_df, test_df
+    return train_df, test_df
 
 if __name__ == "__main__":
     preprocessData()
