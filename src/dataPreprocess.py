@@ -1,8 +1,6 @@
 # Preprocess data for learning
 import pandas as pd
 import os
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 
 def removeOutliers(df, columns, factor = 1.5):
     cleanDF = df.copy()
@@ -97,53 +95,11 @@ def preprocessData():
     print(f"Rows after outlier removal: {len(completeRows)}")
 
     # Save readable cleaned file before one-hot encoding
-    readableCSVPath = os.path.join(script_dir, "..", "cleanedDatasheet.csv")
+    readableCSVPath = os.path.join(script_dir, "../data/processed", "cleaned_dataset.csv")
     completeRows.to_csv(readableCSVPath, index=False)
     print(f"Readable cleaned CSV saved to: {readableCSVPath}")
 
-    textColumns = completeRows.select_dtypes(include=["str"]).columns.tolist();
-    numericColumns = completeRows.select_dtypes(include=["number"]).columns.tolist()
-
-    # Convert to category to make train_test_split behave better
-    completeRows[textColumns] = completeRows[textColumns].astype('category') 
-
-    # Do not scale price because it is the target value
-    if "price" in numericColumns:
-        numericColumns.remove("price")
-
-    # Splitting requires at least 3 makes of certain car (e.g. there's only 1 Oldsmobile)
-    make_counts = completeRows['make'].value_counts()
-    valid_makes = make_counts[make_counts >= 10].index
-    completeRows = completeRows[completeRows['make'].isin(valid_makes)]
-
-    train_df, test_df = train_test_split(
-        completeRows,
-        test_size = 0.2, # Training 80%, Testing 20%
-        stratify=completeRows['make'] # Make sure manufacturers are distributed equally
-    )
-
-    train_df = train_df.copy()
-    test_df = test_df.copy()
-
-    train_df = pd.get_dummies(train_df, drop_first=True, dtype=int)
-    test_df = pd.get_dummies(test_df, drop_first=True, dtype=int)
-
-    scaler = StandardScaler()
-
-    # Prevent data leakage
-    train_df[numericColumns] = scaler.fit_transform(train_df[numericColumns])
-    test_df[numericColumns] = scaler.transform(test_df[numericColumns])
-
-    train_path = os.path.join(script_dir, "..", "train_data.csv")
-    test_path = os.path.join(script_dir, "..", "test_data.csv")
-
-    train_df.to_csv(train_path, index=False)
-    test_df.to_csv(test_path, index=False)
-
-    print(f"Saved learning CSV to: {train_path}")
-    print(f"Saved test CSV to: {test_path}")
-
-    return train_df, test_df
+    return completeRows
 
 if __name__ == "__main__":
     preprocessData()
