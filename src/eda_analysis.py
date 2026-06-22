@@ -5,7 +5,7 @@ from matplotlib.ticker import FuncFormatter
 
 os.makedirs("results/plots", exist_ok=True)
 
-df = pd.read_csv("cleaneddatasheet.csv")
+df = pd.read_csv("./data/cleaned_dataset.csv")
 
 df = df[["price", "miles", "carAge"]].copy()
 
