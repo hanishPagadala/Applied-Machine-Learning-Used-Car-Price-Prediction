@@ -8,7 +8,7 @@ from sklearn.pipeline import Pipeline
 
 def plot_results(y_true, y_pred, model_name, mae, mse, rmse, r2):
     fig, axes = plt.subplots(1, 2, figsize=(18, 8))
-    fig.suptitle(f'Validation Results: {model_name}')
+    fig.suptitle(f'Testing Results: {model_name}')
 
     dollar_formatter = ticker.FuncFormatter(lambda x, pos: f'${x}')
 
