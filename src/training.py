@@ -148,4 +148,9 @@ def train():
 
 
 if __name__ == "__main__":
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    models_path = os.path.join(script_dir, "../models/")
+    results_path = os.path.join(script_dir, "../results/")
+    os.makedirs(models_path, exist_ok=True)
+    os.makedirs(results_path, exist_ok=True)
     train()
