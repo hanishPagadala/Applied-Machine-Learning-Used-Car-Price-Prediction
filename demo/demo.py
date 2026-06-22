@@ -5,7 +5,7 @@ model = joblib.load("../models/random_forest.pkl")
 data = pd.read_csv("../data/processed/cleaned_dataset.csv")
 
 # Choose which row to use
-row_index = 0
+row_index = 2
 
 row = data.iloc[[row_index]]
 
